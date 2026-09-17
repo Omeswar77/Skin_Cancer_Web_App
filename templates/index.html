@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DermoAI | Skin Cancer Detection & Dermoscopic Risk Assessment</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Clinical Disclaimer Banner -->
+    <aside class="disclaimer-bar">
+        <div class="disclaimer-content">
+            <span class="badge badge-warning">Clinical Decision Support Tool</span>
+            <p><strong>Notice:</strong> This AI system is designed for preliminary dermoscopic screening assistance. It does <em>not</em> replace histological biopsy or professional clinical diagnosis by a board-certified dermatologist.</p>
+        </div>
+    </aside>
+
+    <!-- Header / Navbar -->
+    <header class="app-header">
+        <div class="header-container">
+            <div class="brand">
+                <div class="brand-icon">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="9"></circle>
+                        <path d="M12 7v5l3 3"></path>
+                        <path d="M8 12h.01M16 12h.01M12 16h.01"></path>
+                    </svg>
+                </div>
+                <div class="brand-titles">
+                    <h1>DermoAI <span class="brand-sub">Clinical Suite</span></h1>
+                    <span class="brand-tagline">Deep Learning Dermoscopy & Melanoma Risk Classifier</span>
+                </div>
+            </div>
+            <div class="header-badges">
+                <span class="tech-pill">MobileNetV2 Transfer Learning</span>
+                <span class="status-indicator">
+                    <span class="status-dot online"></span> System Active
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="main-wrapper">
+        <div class="dashboard-grid">
+
+            <!-- LEFT PANEL: Image Input, Preview & Sample Gallery -->
+            <section class="panel panel-input">
+                <div class="panel-header">
+                    <h2>1. Dermoscopic Image Acquisition</h2>
+                    <p class="section-desc">Upload a high-resolution dermoscopic or macro photograph of the skin lesion.</p>
+                </div>
+
+                <!-- Dropzone Area -->
+                <div class="dropzone" id="dropZone">
+                    <input type="file" id="imageInput" accept="image/*" class="file-input-hidden">
+                    <div class="dropzone-idle" id="dropzoneIdle">
+                        <div class="dropzone-icon">
+                            <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="17 8 12 3 7 8"></polyline>
+                                <line x1="12" y1="3" x2="12" y2="15"></line>
+                            </svg>
+                        </div>
+                        <p class="dropzone-prompt"><strong>Drag and drop</strong> lesion image here</p>
+                        <span class="dropzone-sub">or <button type="button" class="btn-link" id="browseBtn">browse from device</button></span>
+                        <span class="file-limits">Supports JPG, PNG, WEBP (Dermoscopy preferred)</span>
+                    </div>
+
+                    <!-- Live Image Preview inside Dropzone -->
+                    <div class="dropzone-preview hidden" id="dropzonePreview">
+                        <img id="previewImg" alt="Dermoscopic Preview">
+                        <div class="preview-overlay">
+                            <span class="preview-filename" id="previewFilename">image.jpg</span>
+                            <button type="button" class="btn-change" id="changeImageBtn">Replace</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 1-Click Interactive Sample Gallery -->
+                <div class="sample-gallery-section">
+                    <div class="sample-header">
+                        <h3>Instant Test Cases (ISIC Archive):</h3>
+                        <span class="sample-help">Click to test instantly</span>
+                    </div>
+                    <div class="sample-chips" id="sampleChips">
+                        <!-- Malignant samples -->
+                        <button type="button" class="sample-chip chip-malignant" data-sample="sample_malignant_1.jpg" title="ISIC Malignant Melanoma lesion">
+                            <span class="chip-label">Malignant Case 1</span>
+                        </button>
+                        <button type="button" class="sample-chip chip-malignant" data-sample="sample_malignant_2.jpg" title="ISIC Melanoma lesion">
+                            <span class="chip-label">Malignant Case 2</span>
+                        </button>
+                        <button type="button" class="sample-chip chip-malignant" data-sample="sample_malignant_3.jpg" title="ISIC Melanoma lesion">
+                            <span class="chip-label">Malignant Case 3</span>
+                        </button>
+                        <!-- Benign samples -->
+                        <button type="button" class="sample-chip chip-benign" data-sample="sample_benign_1.jpg" title="ISIC Benign Nevus lesion">
+                            <span class="chip-label">Benign Case 1</span>
+                        </button>
+                        <button type="button" class="sample-chip chip-benign" data-sample="sample_benign_2.jpg" title="ISIC Benign Nevus lesion">
+                            <span class="chip-label">Benign Case 2</span>
+                        </button>
+                        <button type="button" class="sample-chip chip-benign" data-sample="sample_benign_3.jpg" title="ISIC Benign Nevus lesion">
+                            <span class="chip-label">Benign Case 3</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Action Button -->
+                <div class="action-row">
+                    <button id="predictBtn" class="btn-primary" disabled>
+                        <svg class="btn-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                        </svg>
+                        <span>Run Dermoscopic Analysis</span>
+                    </button>
+                    <button id="resetBtn" class="btn-secondary" title="Reset current selection">Reset</button>
+                </div>
+            </section>
+
+            <!-- RIGHT PANEL: Diagnostic Findings & Clinical Guidance -->
+            <section class="panel panel-results" id="resultsPanel">
+                <div class="panel-header">
+                    <h2>2. Diagnostic Assessment & Metrics</h2>
+                    <p class="section-desc">Automated neural feature extraction and probabilistic malignancy scoring.</p>
+                </div>
+
+                <!-- Initial Idle State -->
+                <div class="results-empty" id="resultsEmpty">
+                    <div class="empty-icon">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                            <polyline points="21 15 16 10 5 21"></polyline>
+                        </svg>
+                    </div>
+                    <h4>Awaiting Dermoscopic Image</h4>
+                    <p>Select a sample from the test gallery or upload a lesion photograph to view diagnostic classification, malignancy probability, and clinical risk tier.</p>
+                </div>
+
+                <!-- Loading State -->
+                <div class="results-loading hidden" id="resultsLoading">
+                    <div class="spinner"></div>
+                    <h4>Analyzing Dermoscopic Features...</h4>
+                    <p>Executing convolutional layers and computing probability distribution...</p>
+                </div>
+
+                <!-- Active Report / Assessment View -->
+                <div class="results-active hidden" id="resultsActive">
+                    <!-- Primary Verdict Card -->
+                    <div class="verdict-card" id="verdictCard">
+                        <div class="verdict-top">
+                            <span class="verdict-label">Classification Verdict</span>
+                            <span class="verdict-pill" id="verdictPill">--</span>
+                        </div>
+                        <h3 class="verdict-heading" id="verdictHeading">--</h3>
+                        <p class="verdict-summary" id="verdictSummary">--</p>
+                    </div>
+
+                    <!-- Metrics Breakdown Grid -->
+                    <div class="metrics-grid">
+                        <div class="metric-box">
+                            <span class="metric-title">Model Confidence</span>
+                            <span class="metric-val" id="metricConfidence">0.0%</span>
+                            <span class="metric-sub" id="metricConfidenceSub">Softmax certainty</span>
+                        </div>
+                        <div class="metric-box">
+                            <span class="metric-title">Risk Stratification</span>
+                            <span class="metric-val risk-val" id="metricRiskTier">--</span>
+                            <span class="metric-sub">Triage level</span>
+                        </div>
+                    </div>
+
+                    <!-- Malignancy Probability Bar -->
+                    <div class="prob-section">
+                        <div class="prob-header">
+                            <span>Malignancy Risk Index</span>
+                            <span id="probPercent">0.0%</span>
+                        </div>
+                        <div class="prob-bar-track">
+                            <div class="prob-bar-fill" id="probBarFill" style="width: 0%;"></div>
+                        </div>
+                        <div class="prob-labels">
+                            <span>0% (Benign)</span>
+                            <span>Threshold: 50%</span>
+                            <span>100% (Malignant)</span>
+                        </div>
+                    </div>
+
+                    <!-- Clinical Recommendations Box -->
+                    <div class="recommendation-card" id="recommendationCard">
+                        <div class="recommendation-header">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="8" x2="12" y2="12"></line>
+                                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                            </svg>
+                            <h4>Recommended Clinical Protocol</h4>
+                        </div>
+                        <ul class="recommendation-list" id="recommendationList">
+                            <!-- Populated dynamically via script.js -->
+                        </ul>
+                    </div>
+
+                    <!-- Print / Export Action -->
+                    <div class="export-row">
+                        <button type="button" class="btn-export" id="printReportBtn">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                                <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                                <rect x="6" y="14" width="12" height="8"></rect>
+                            </svg>
+                            <span>Generate Patient Summary Report</span>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+
+        <!-- Clinical Education Section: ABCDE Criteria for Melanoma -->
+        <section class="abcde-section">
+            <div class="abcde-header">
+                <h3>Clinical Benchmark: The ABCDE Rule for Melanoma Detection</h3>
+                <p>Standard dermatological criteria for visual evaluation of pigmented cutaneous lesions.</p>
+            </div>
+            <div class="abcde-grid">
+                <div class="abcde-card">
+                    <div class="abcde-letter">A</div>
+                    <h4>Asymmetry</h4>
+                    <p>One half of the lesion does not match the other half in contour or pattern.</p>
+                </div>
+                <div class="abcde-card">
+                    <div class="abcde-letter">B</div>
+                    <h4>Border</h4>
+                    <p>Edges are irregular, ragged, scalloped, notched, or poorly defined.</p>
+                </div>
+                <div class="abcde-card">
+                    <div class="abcde-letter">C</div>
+                    <h4>Color</h4>
+                    <p>Pigment variation with shades of tan, dark brown, black, red, or blue.</p>
+                </div>
+                <div class="abcde-card">
+                    <div class="abcde-letter">D</div>
+                    <h4>Diameter</h4>
+                    <p>Typically larger than 6mm (approx. the diameter of a standard pencil eraser).</p>
+                </div>
+                <div class="abcde-card">
+                    <div class="abcde-letter">E</div>
+                    <h4>Evolving</h4>
+                    <p>Any lesion that changes in size, shape, color, elevation, or causes itching/bleeding.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+        <div class="footer-container">
+            <p>DermoAI Skin Lesion Diagnostic Assistant &bull; Trained on the ISIC (International Skin Imaging Collaboration) Archive</p>
+            <p class="copyright">&copy; 2026 DermoAI. For educational and investigative clinical assistance only.</p>
+        </div>
+    </footer>
+
+    <!-- Print Report Modal / Hidden Printable Template -->
+    <div id="printableReport" class="print-only">
+        <!-- Rendered when printing -->
+    </div>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
