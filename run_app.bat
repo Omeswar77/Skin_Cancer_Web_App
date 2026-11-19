@@ -17,6 +17,8 @@ echo Activating Python environment...
 call venv\Scripts\activate.bat
 
 echo Starting Flask Server on http://127.0.0.1:5000 ...
-python app.py
+echo (Keep this window open while using the web application)
+echo.
+venv\Scripts\python.exe app.py
 
 pause

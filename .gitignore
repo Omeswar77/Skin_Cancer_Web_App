@@ -46,4 +46,5 @@ checkpoint/
 dataset/
 *.h5
 model/
+practice
 
