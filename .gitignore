@@ -1,12 +1,18 @@
+
 # Python
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
+
+# Virtual Environment
 env/
 venv/
 ENV/
+.env
+
+# Build files
 build/
 develop-eggs/
 dist/
@@ -23,10 +29,6 @@ wheels/
 .installed.cfg
 *.egg
 
-# Virtual Environment
-venv/
-.env
-
 # IDEs
 .vscode/
 .idea/
@@ -42,9 +44,17 @@ Desktop.ini
 *.log
 checkpoint/
 
-# Dataset and Models
+# Dataset
 dataset/
+
+# Ignore H5 models by default
 *.h5
-model/
+
+# Allow trained models
+!model/
+!model/best_skin_cancer_model.h5
+!model/skin_cancer_model.h5
+
+# Scratch file
 practice
 
