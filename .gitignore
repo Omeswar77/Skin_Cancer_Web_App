@@ -40,21 +40,17 @@ wheels/
 Thumbs.db
 Desktop.ini
 
-# Logs and checkpoints
+# Logs
 *.log
 checkpoint/
 
 # Dataset
 dataset/
 
-# Ignore H5 models by default
+# Ignore H5 files by default
 *.h5
 
 # Allow trained models
 !model/
-!model/best_skin_cancer_model.h5
-!model/skin_cancer_model.h5
-
-# Scratch file
-practice
+!model/*.h5
 
